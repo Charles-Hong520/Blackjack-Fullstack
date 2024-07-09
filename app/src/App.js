@@ -6,14 +6,20 @@ const App = () => {
   const [isConnected, setIsConnected] = useState(false)
 
   useEffect(() => {
-    socket.on('connect', () => setIsConnected(true))
-    socket.on('disconnect', () => setIsConnected(false))
-    socket.on('server_message', (m) => {
+    const onConnect = () => setIsConnected(true)
+    const onDisconnect = () => setIsConnected(false)
+    const onServerMessage = (m) => {
       console.log('[server message]', m)
-    })
+    }
+
+    socket.on('connect', onConnect)
+    socket.on('disconnect', onDisconnect)
+    socket.on('server_message', onServerMessage)
 
     return () => {
-      
+      socket.off('connect', onConnect)
+      socket.off('disconnect', onDisconnect)
+      socket.off('server_message', onServerMessage)
     }
   })
 
