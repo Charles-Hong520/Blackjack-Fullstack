@@ -1,49 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Card, CardContent, Typography, TextField, IconButton, Select, MenuItem, InputLabel, CardActions, Divider, CircularProgress } from '@mui/material';
+import React, { useState } from 'react'
+import { Card, CardContent, TextField, IconButton, Select, MenuItem, InputLabel, CardActions, Divider, CircularProgress, Typography, Button } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { socket } from '../sockets'
 
-const EditableTitle = ({ initialTitle }) => {
-  const [title, setTitle] = useState(initialTitle)
+import EditableTitle from './EditableTitle';
 
-  const textFieldRef = useRef(null)
-  const [isEditing, setIsEditing] = useState(false)
-  
-  return (
-    <>
-      {
-        !isEditing ?
-        <Typography
-          onClick={() => {
-            console.log(textFieldRef)
-            setIsEditing(true)
-          }}
-          variant='h5'
-        >
-          {title}
-        </Typography>
-        :
-        <TextField
-          inputRef={textFieldRef}
-          size='small'
-          value={title}
-          sx={{ paddingBottom: 2 }}
-          onChange={(e) => setTitle(e.target.value)}
-          onBlur={() => setIsEditing(false)}
-          hidden={ !isEditing }
-        >
-          hi
-        </TextField>
-      }
-
-      
-        
-      
-    </>
-  )
-} 
-
-const Emitter = ( {title, initial} ) => {
+const Emitter = ( {id, initial, removeSelf} ) => {
 
   const [tag, setTag] = useState(initial?.tag)
   const [data, setData] = useState(initial?.data) 
@@ -52,22 +14,24 @@ const Emitter = ( {title, initial} ) => {
 
   // send socket message with current parameters.
   const sendMessage = () => {
-    console.log({tag, data})
     setLoading(true)
     setReturned('waiting for response...')
     socket.emit(tag, data, (ret) => {
+      ret = JSON.stringify(ret)
       setLoading(false)
       setReturned(ret)
-      console.log('resolved')
     })
   }
 
   return (
-    <Card variant='outlined'
+    <Card 
+      variant='outlined'
       style={{ marginTop: '10px' }}
     >
       <CardContent>
-        <EditableTitle initialTitle={title}/>
+        <Button onClick={removeSelf}>Delete</Button>
+        {/* <Typography>{id}</Typography> */}
+        <EditableTitle initialTitle={initial.title}/>
         <br/>
         <TextField 
           size='small' 
@@ -86,12 +50,12 @@ const Emitter = ( {title, initial} ) => {
           }}
         />
 
-        <InputLabel id='data-type-select-label'>Data Type</InputLabel>
+        {/* <InputLabel id='data-type-select-label'>Data Type</InputLabel>
         <Select size='small' labelId='data-type-select-label'>
           <MenuItem value={10}>json</MenuItem>
           <MenuItem value={20}>number</MenuItem>
           <MenuItem value={30}>string</MenuItem>
-        </Select>
+        </Select> */}
 
         <br />
         <br />
@@ -106,7 +70,9 @@ const Emitter = ( {title, initial} ) => {
 
 
       </CardContent>
+      
       <Divider />
+      
       <CardActions
         sx={{
           display: 'flex',

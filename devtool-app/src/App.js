@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Grid, Typography } from '@mui/material';
-import Emitter from './Component/Emitter';
+import { Button, Grid, Typography } from '@mui/material'
+
+import { nanoid } from 'nanoid'
+
+import Emitter from './Component/Emitter'
+import Listener from './Component/Listener'
 
 import { socket } from './sockets'
 
@@ -29,6 +33,13 @@ const App = () => {
 
   const [isConnected, setIsConnected] = useState(false)
   const [emitters, setEmitters] = useState([])
+  const [listeners, setListeners] = useState([])
+
+  const removeEmitter = (id) => {
+    const newEmitters = emitters.filter((em) => em.id !== id)
+    console.log('newEmitters=', newEmitters)
+    setEmitters(newEmitters)
+  }
 
   useEffect(() => {
     const onConnect = () => setIsConnected(true)
@@ -53,20 +64,46 @@ const App = () => {
           <Button 
             variant='outlined'
             onClick={() => {
-              console.log(emitters)
-              const newEmitter = { title: 'click to edit title', tag: '', data: '' }
+              const newEmitter = { 
+                id: nanoid(),
+                title: 'click to edit title', 
+                tag: '', 
+                data: '' 
+              }
               setEmitters([...emitters, newEmitter])
             }}
           >
             Add Emitter
           </Button>
-          {emitters.map(({title, tag, data}) => {
-            return <Emitter title={title} initial={{tag, data}}/>
+
+          {/* render all emitters */}
+          {emitters.map(({title, tag, data, id}) => {
+            return <Emitter id={id} initial={{title, tag, data}} removeSelf={() => removeEmitter(id)}/>
           })}
+
         </CustomGridItem>
 
         <CustomGridItem>
-          <Button variant='outlined'>Add Listeners</Button>
+          <Button 
+            variant='outlined'
+            onClick={() => {
+              const newListener = {
+                id: nanoid(),
+                title: 'click to edit title',
+                tag: '',
+                data: ''
+              }
+              setListeners([...listeners, newListener])
+            }}
+          >
+            Add Listener
+          </Button>
+
+          {/* render all listners */}
+          {listeners.map(({title, tag, data, id}) => {
+            return <Listener id={id} initial={{title, tag, data}} removeSelf={() => removeEmitter(id)}/>
+          })}
+
         </CustomGridItem>
 
         {/* <CustomGridItem>
